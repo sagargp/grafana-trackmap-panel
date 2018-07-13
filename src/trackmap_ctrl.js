@@ -117,31 +117,18 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
 
     // Create the map
     this.leafMap = L.map('trackmap-' + this.panel.id, {
-      scrollWheelZoom: false,
+        // scrollWheelZoom: false,
       zoomSnap: 0.5,
       zoomDelta: 1,
+        crs: L.CRS.Simple,
+        minZoom: -5
     });
 
     // Define layers and add them to the control widget
-    L.control.layers({
-      'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-      }).addTo(this.leafMap), // Add default layer to map
-      'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
-        maxZoom: 17
-      }),
-      'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Imagery &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        // This map doesn't have labels so we force a label-only layer on top of it
-        forcedOverlay: L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}.png', {
-          attribution: 'Labels by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          subdomains: 'abcd',
-          maxZoom: 20,
-        })
-      })
-    }).addTo(this.leafMap);
+    // this.defaultBounds = L.bounds(L.point(-3200, 3390), L.point(10620, -21760));
+    this.defaultBounds = [[-3200, 3390], [10620, -21760]];
+    var image = L.imageOverlay('/public/plugins/grafana-trackmap-panel/img/map.png', this.defaultBounds).addTo(this.leafMap);
+    this.leafMap.fitBounds(this.defaultBounds);
 
     // Dummy hovermarker
     this.hoverMarker = L.circleMarker(L.latLng(0, 0), {
@@ -153,7 +140,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     }).addTo(this.leafMap);
 
     // Events
-    this.leafMap.on('baselayerchange', this.mapBaseLayerChange.bind(this));
+    // this.leafMap.on('baselayerchange', this.mapBaseLayerChange.bind(this));
     this.leafMap.on('boxzoomend', this.mapZoomToBox.bind(this));
   }
 
@@ -227,10 +214,11 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
 
     if (data.length === 0 || data.length !== 2) {
       // No data or incorrect data, show a world map and abort
-      this.leafMap.setView([0, 0], 1);
+        // this.leafMap.fitBounds(this.defaultBounds);
       return;
     }
 
+    /*
     // Asumption is that there are an equal number of properly matched timestamps
     // TODO: proper joining by timestamp?
     this.coords.length = 0;
@@ -248,6 +236,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
       });
     }
     this.addDataToMap();
+    */
   }
 }
 
